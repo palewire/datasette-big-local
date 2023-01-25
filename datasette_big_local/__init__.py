@@ -14,6 +14,7 @@ import re
 
 ALLOWED = "abcdefghijklmnopqrstuvwxyz" "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "0123456789"
 split_re = re.compile("(_[0-9a-f]+_)")
+API_URL = "https://dev-api.biglocalnews.org/graphql"
 
 
 @hookimpl
@@ -89,7 +90,7 @@ FILES = """
 async def get_project(project_id, remember_token, files=False):
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            "https://api.biglocalnews.org/graphql",
+            API_URL,
             json={
                 "variables": {"id": project_id},
                 "query": """
@@ -155,7 +156,6 @@ class OpenError(Exception):
 
 
 async def open_project_file(project_id, filename, remember_token):
-    graphql_endpoint = "https://api.biglocalnews.org/graphql"
     body = {
         "operationName": "CreateFileDownloadURI",
         "variables": {
@@ -180,7 +180,7 @@ async def open_project_file(project_id, filename, remember_token):
     }
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            graphql_endpoint,
+            API_URL,
             json=body,
             cookies={"remember_token": remember_token},
             timeout=30,
@@ -315,7 +315,6 @@ async def big_local_open(request, datasette):
 
 
 async def get_big_local_user(remember_token):
-    graphql_endpoint = "https://api.biglocalnews.org/graphql"
     query = """
     query {
         user {
@@ -328,7 +327,7 @@ async def get_big_local_user(remember_token):
     """.strip()
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            graphql_endpoint,
+            API_URL,
             json={"query": query},
             cookies={"remember_token": remember_token},
             timeout=30,
